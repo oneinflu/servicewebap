@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useEffect, useMemo, useState } from "react";
 import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";

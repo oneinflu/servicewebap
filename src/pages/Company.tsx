@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import PageMeta from "../components/common/PageMeta";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import Button from "../components/ui/button/Button";
-import { apiFetch, API_BASE } from "../lib/api";
+import { apiFetch,  } from "../lib/api";
 import { useProfile } from "../hooks/useProfile";
 
 type Company = {
@@ -92,11 +93,10 @@ export default function CompanyPage() {
           pincode: form.location?.pincode || "",
         },
       };
-      let res;
       if (existing?._id) {
-        res = await apiFetch(`/api/companies/${existing._id}`, { method: "PATCH", body: payload });
+        await apiFetch(`/api/companies/${existing._id}`, { method: "PATCH", body: payload });
       } else {
-        res = await apiFetch(`/api/companies`, { method: "POST", body: payload });
+        await apiFetch(`/api/companies`, { method: "POST", body: payload });
       }
       setMessage(existing?._id ? "Company updated." : "Company created.");
       await refreshProfile();

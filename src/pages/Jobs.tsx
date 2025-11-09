@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useState } from "react";
 import PageMeta from "../components/common/PageMeta";
@@ -41,7 +42,7 @@ export default function JobsPage() {
   type JobKind = 'Private' | 'Govt Jobs' | 'PSU Jobs' | 'Semi Govt Jobs' | 'MSME Jobs';
   const [jobKind, setJobKind] = useState<JobKind>('Private');
   const [subs, setSubs] = useState<Subscription[]>([]);
-  const [myJobsCount, setMyJobsCount] = useState<number>(0);
+  const [, setMyJobsCount] = useState<number>(0);
   const [myJobs, setMyJobs] = useState<Job[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -64,7 +65,6 @@ export default function JobsPage() {
     if (jobKind !== 'Private') return true;
     return jobTrialActive || subs.some(s => ["JOB_SEARCH", "SERVICE_POST"].includes(s.type));
   }, [subs, jobTrialActive, jobKind]);
-  const hasPostSub = useMemo(() => subs.some(s => s.type === "SERVICE_POST"), [subs]);
   
   const tokenParam = (() => {
     const t = getToken();
