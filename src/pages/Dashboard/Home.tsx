@@ -6,7 +6,6 @@ import { apiFetch } from "../../lib/api";
 type Service = { _id: string; title?: string; name?: string; createdAt?: string };
 type Job = { _id: string; title?: string; createdAt?: string };
 type Company = { _id: string; name?: string; createdAt?: string };
-type GovernmentJob = { _id: string; title?: string; createdAt?: string };
 type Subscription = { _id: string; type?: string; endDate?: string };
 type Transaction = { _id: string; amount?: number; status?: string; createdAt?: string };
 type Profile = { _id: string; name?: string; email?: string; role?: string; createdAt?: string };
@@ -19,7 +18,6 @@ export default function Home() {
   const [myServices, setMyServices] = useState<Service[]>([]);
   const [myJobs, setMyJobs] = useState<Job[]>([]);
   const [myCompany, setMyCompany] = useState<Company | null>(null);
-  const [govJobs, setGovJobs] = useState<GovernmentJob[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [firstTime, setFirstTime] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,9 +39,6 @@ export default function Home() {
 
     (async () => {
       try {
-        // Always load public lists (government jobs are public)
-        const gjRes = await fetchJson("/api/government-jobs", false);
-
         // Load personalized data only if token exists
         const token = localStorage.getItem("token");
         if (token) {
@@ -76,9 +71,6 @@ export default function Home() {
           setTransactions([]);
           setFirstTime(null);
         }
-
-        // Set public government jobs list
-        setGovJobs(gjRes?.data?.governmentJobs || gjRes?.governmentJobs || []);
         setError(null);
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : String(err);
@@ -141,7 +133,6 @@ export default function Home() {
             } />
             <Stat label="Subscription" value={activeSubscription ? (activeSubscription.type || "Active") : "None"} />
             <Stat label="Company" value={myCompany ? (myCompany.name || "Available") : "Not Set"} />
-            <Stat label="Govt Jobs" value={govJobs.length} />
           </div>
 
           {/* Quick links */}

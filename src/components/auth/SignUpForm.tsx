@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { apiFetch, setToken } from "../../lib/api";
 import { ChevronLeftIcon, EyeCloseIcon, EyeIcon } from "../../icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
@@ -11,6 +12,14 @@ export default function SignUpForm() {
   const [searchParams] = useSearchParams();
   const referredBy = searchParams.get("referredBy") ?? "";
   const [referralId, setReferralId] = useState<string>(referredBy);
+  const [fname, setFname] = useState("");
+  const [lname, setLname] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
   return (
     <div className="flex flex-col flex-1 w-full overflow-y-auto lg:w-1/2 no-scrollbar">
       <div className="w-full max-w-md mx-auto mb-5 sm:pt-10">
@@ -34,7 +43,41 @@ export default function SignUpForm() {
           </div>
           <div>
            
-            <form>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setError(null);
+                if (!fname.trim() || !lname.trim() || !email.trim() || !phone.trim() || !password.trim()) {
+                  setError("Please fill all required fields.");
+                  return;
+                }
+                if (!isChecked) {
+                  // Not critical, but encourage accepting terms
+                  setError("Please accept Terms and Privacy Policy.");
+                  return;
+                }
+                setLoading(true);
+                try {
+                  const name = `${fname} ${lname}`.trim();
+                  const body = { name, email, phone, password, referredBy: referralId || undefined };
+                  const res = await apiFetch<{ status: string; token: string }>("/api/auth/register", {
+                    method: "POST",
+                    auth: false,
+                    body,
+                  });
+                  const token = res?.token;
+                  if (token) {
+                    setToken(token);
+                  }
+                  navigate("/");
+                } catch (err: unknown) {
+                  const msg = err instanceof Error ? err.message : "Signup failed";
+                  setError(msg);
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
               <div className="space-y-5">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   {/* <!-- First Name --> */}
@@ -47,6 +90,8 @@ export default function SignUpForm() {
                       id="fname"
                       name="fname"
                       placeholder="Enter your first name"
+                      value={fname}
+                      onChange={(e) => setFname(e.target.value)}
                     />
                   </div>
                   {/* <!-- Last Name --> */}
@@ -59,6 +104,8 @@ export default function SignUpForm() {
                       id="lname"
                       name="lname"
                       placeholder="Enter your last name"
+                      value={lname}
+                      onChange={(e) => setLname(e.target.value)}
                     />
                   </div>
                 </div>
@@ -72,6 +119,22 @@ export default function SignUpForm() {
                     id="email"
                     name="email"
                     placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+                {/* <!-- Phone --> */}
+                <div>
+                  <Label>
+                    Phone<span className="text-error-500">*</span>
+                  </Label>
+                  <Input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
                 {/* <!-- Referral Code --> */}
@@ -102,6 +165,8 @@ export default function SignUpForm() {
                     <Input
                       placeholder="Enter your password"
                       type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -133,10 +198,13 @@ export default function SignUpForm() {
                     </span>
                   </p>
                 </div>
+                {error && (
+                  <div className="text-error-500 text-sm">{error}</div>
+                )}
                 {/* <!-- Button --> */}
                 <div>
-                  <button className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
-                    Sign Up
+                  <button type="submit" disabled={loading} className="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-60">
+                    {loading ? "Signing up…" : "Sign Up"}
                   </button>
                 </div>
               </div>
